@@ -23,6 +23,10 @@ int getpid(void);
 char* sbrk(int);
 int sleep(int);
 int uptime(void);
+int update_env(int, int);
+int get_env(int);
+int get_energy(int);
+int set_zone(int, int);
 
 // ulib.c
 int stat(const char*, struct stat*);

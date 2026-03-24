@@ -49,6 +49,16 @@ struct proc {
   struct file *ofile[NOFILE];  // Open files
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
+  uint energy_ticks;           // CPU metric
+  int zone_affiliation;        // Which zone this belongs to
+  int is_mitigator;            // Bypasses throttling
+};
+
+#define MAX_ZONES 5
+
+struct env_zone {
+  int pollution_level;
+  int energy_usage;
 };
 
 // Process memory is laid out contiguously, low addresses first:

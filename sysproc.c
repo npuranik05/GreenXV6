@@ -89,3 +89,31 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+int
+sys_update_env(void)
+{
+  int zone, delta;
+  if(argint(0, &zone) < 0 || argint(1, &delta) < 0) return -1;
+  return update_env_var(zone, delta);
+}
+
+int sys_get_env(void) {
+  int zone;
+  if(argint(0, &zone) < 0) return -1;
+  return get_env_var(zone);
+}
+
+int sys_get_energy(void) {
+  int pid;
+  if(argint(0, &pid) < 0) return -1;
+  return get_proc_energy(pid);
+}
+
+int sys_set_zone(void) {
+  int zone, mitigator;
+  if(argint(0, &zone) < 0 || argint(1, &mitigator) < 0) return -1;
+  myproc()->zone_affiliation = zone;
+  myproc()->is_mitigator = mitigator;
+  return 0;
+}

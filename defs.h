@@ -120,6 +120,10 @@ void            userinit(void);
 int             wait(void);
 void            wakeup(void*);
 void            yield(void);
+void            envinit(void);
+int             update_env_var(int, int);
+int             get_env_var(int);
+int             get_proc_energy(int);
 
 // swtch.S
 void            swtch(struct context**, struct context*);

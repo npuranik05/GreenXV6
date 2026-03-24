@@ -103,6 +103,10 @@ extern int sys_unlink(void);
 extern int sys_wait(void);
 extern int sys_write(void);
 extern int sys_uptime(void);
+extern int sys_update_env(void);
+extern int sys_get_env(void);
+extern int sys_get_energy(void);
+extern int sys_set_zone(void);
 
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -126,6 +130,10 @@ static int (*syscalls[])(void) = {
 [SYS_link]    sys_link,
 [SYS_mkdir]   sys_mkdir,
 [SYS_close]   sys_close,
+[SYS_update_env] sys_update_env,
+[SYS_get_env]    sys_get_env,
+[SYS_get_energy] sys_get_energy,
+[SYS_set_zone]   sys_set_zone,
 };
 
 void

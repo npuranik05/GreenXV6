@@ -12,6 +12,11 @@ struct {
   struct proc proc[NPROC];
 } ptable;
 
+struct {
+  struct spinlock lock;
+  struct env_zone zones[MAX_ZONES];
+} env;
+
 static struct proc *initproc;
 
 int nextpid = 1;
@@ -24,6 +29,16 @@ void
 pinit(void)
 {
   initlock(&ptable.lock, "ptable");
+}
+
+void
+envinit(void)
+{
+  initlock(&env.lock, "env");
+  for(int i = 0; i < MAX_ZONES; i++) {
+    env.zones[i].pollution_level = 0;
+    env.zones[i].energy_usage = 0;
+  }
 }
 
 // Must be called with interrupts disabled
@@ -88,6 +103,9 @@ allocproc(void)
 found:
   p->state = EMBRYO;
   p->pid = nextpid++;
+  p->energy_ticks = 0;
+  p->zone_affiliation = 0;
+  p->is_mitigator = 0;
 
   release(&ptable.lock);
 
@@ -336,6 +354,17 @@ scheduler(void)
       if(p->state != RUNNABLE)
         continue;
 
+      int zone = p->zone_affiliation;
+      if (zone >= 0 && zone < MAX_ZONES && p->is_mitigator == 0) {
+        int pol = 0;
+        acquire(&env.lock);
+        pol = env.zones[zone].pollution_level;
+        release(&env.lock);
+        if (pol > 100) {
+          continue; // Throttle this process!
+        }
+      }
+
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
       // before jumping back to us.
@@ -531,4 +560,50 @@ procdump(void)
     }
     cprintf("\n");
   }
+}
+
+int
+update_env_var(int zone_id, int pollution_delta)
+{
+  if(zone_id < 0 || zone_id >= MAX_ZONES)
+    return -1;
+  acquire(&env.lock);
+  env.zones[zone_id].pollution_level += pollution_delta;
+  if(env.zones[zone_id].pollution_level < 0)
+    env.zones[zone_id].pollution_level = 0;
+  // Phase 5 mitigation alert threshold
+  if(env.zones[zone_id].pollution_level > 100) {
+    cprintf("KERNEL ALERT: Zone %d Pollution Critical!\n", zone_id);
+    wakeup(&env.zones[zone_id]);
+  }
+  release(&env.lock);
+  return 0;
+}
+
+int
+get_env_var(int zone_id)
+{
+  int pol;
+  if(zone_id < 0 || zone_id >= MAX_ZONES)
+    return -1;
+  acquire(&env.lock);
+  pol = env.zones[zone_id].pollution_level;
+  release(&env.lock);
+  return pol;
+}
+
+int
+get_proc_energy(int pid)
+{
+  struct proc *p;
+  int energy = -1;
+  acquire(&ptable.lock);
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if(p->pid == pid){
+      energy = p->energy_ticks;
+      break;
+    }
+  }
+  release(&ptable.lock);
+  return energy;
 }
