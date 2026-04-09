@@ -1,0 +1,93 @@
+ENVIRONMENTAL SUSTAINABILITY OS PROJECT
+
+OVERVIEW
+
+This project extends xv6, a Unix-like operating system used for educational purposes, 
+with environmental sustainability features. The system monitors and manages pollution 
+levels across different campus zones and tracks energy consumption of processes.
+
+The implementation includes:
+  - Environment tracking: Monitor pollution levels in 5 different zones
+  - Energy accounting: Track CPU energy consumption by individual processes
+  - Sensor simulation: Processes that generate pollution data
+  - Mitigation: Autonomous processes that reduce pollution when thresholds are exceeded
+  - Status monitoring: Real-time display of environmental metrics
+
+FEATURES
+
+New System Calls:
+  - update_env(zone, delta): Update pollution level for a campus zone
+  - get_env(zone): Get current pollution level for a zone
+  - get_energy(pid): Get accumulated energy ticks consumed by a process
+  - set_zone(zone, is_mitigator): Register a process with a zone (flag for mitigators)
+
+New User Programs:
+  - sensor: Simulates environmental pollution (adds pollution periodically)
+  - monitor: Displays real-time status of all 5 campus zones
+  - mitigator: Automatically reduces pollution when levels exceed thresholds
+  - energy_test: Tests energy accounting functionality
+  - env_test: Tests environment update functionality
+
+Kernel Modifications:
+  - Extended process structure to track zone assignments
+  - Per-zone pollution tracking in kernel state
+  - Energy accounting for process scheduling
+  - Protection for mitigator processes (cannot be throttled)
+
+BUILDING AND RUNNING
+
+To build xv6 on an x86 ELF machine (like Linux), run:
+  make
+
+On non-x86 or non-ELF machines (like OS X or Windows), you will need to install 
+a cross-compiler gcc suite capable of producing x86 ELF binaries 
+(see https://pdos.csail.mit.edu/6.828/).
+
+Then run:
+  make TOOLPREFIX=i386-jos-elf-
+
+Install QEMU PC simulator and run:
+  make qemu
+
+USING THE ENVIRONMENTAL SUSTAINABILITY FEATURES
+
+1. Start the monitor to view pollution levels:
+   $ monitor
+
+2. In other shell instances, start sensors for different zones:
+   $ sensor 0    # Zone 0 sensor
+   $ sensor 1    # Zone 1 sensor
+
+3. Start mitigators to manage pollution:
+   $ mitigator 0   # Zone 0 mitigator
+   $ mitigator 1   # Zone 1 mitigator
+
+4. Test the energy accounting system:
+   $ energy_test
+
+5. Test the environment syscalls:
+   $ env_test
+
+The monitor will display pollution levels and mark zones with [CRITICAL] status 
+when pollution exceeds 100 units. Mitigators will automatically reduce pollution 
+by 50 units when cleaning a zone.
+
+ARCHITECTURE NOTES
+
+The system uses a simple model where:
+  - 5 campus zones (0-4) can track independent pollution levels
+  - Processes can associate with a zone to generate or mitigate pollution
+  - Mitigators are protected from throttling to ensure cleanup operations
+  - Energy accounting is performed during context switches
+
+ACKNOWLEDGMENTS
+
+This project is based on xv6, which is inspired by John Lions's Commentary 
+on UNIX 6th Edition. See https://pdos.csail.mit.edu/6.828/ for additional 
+resources.
+
+Original xv6 code is Copyright 2006-2018 Frans Kaashoek, Robert Morris, 
+and Russ Cox.
+
+This Environmental Sustainability extension was developed as a group project 
+for SE 3313B.
