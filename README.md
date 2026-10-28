@@ -1,4 +1,4 @@
-# GreenXV6 — Environmental Sustainability Extension for xv6
+# GreenXV6 — Kernel-Level Environmental Monitoring
 
 A kernel-level extension to the xv6 teaching operating system that simulates a campus-wide network of air quality sensors, pollution mitigation, and per-process energy accounting. The project models environmental monitoring as an OS problem and demonstrates custom syscall design, kernel synchronization with spinlocks, and scheduler modification.
 
